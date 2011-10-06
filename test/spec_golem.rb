@@ -86,7 +86,6 @@ describe "Golem" do
   end
   it "Should send everything to :index if it exists and there is no matching method for first arg" do
     IndexedR.get('/exist/a/b/c/d').body.should=='a+b+c+d'
-    Indexed.new.public_methods.include?(:index)
     IndexedR.get('/a/b/c/d').body.should=='a+b+c+d'
   end
   it "Should set dispatch-specific variables correctly when defaulting to :index" do
