@@ -1,3 +1,5 @@
+require 'tilt'
+
 module Rack::Golem
   
   def self.included(klass)
