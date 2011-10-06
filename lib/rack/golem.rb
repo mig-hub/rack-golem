@@ -18,7 +18,7 @@ module Rack::Golem
       @dispatcher_block || proc{
         @path_atoms = @r.path_info.split('/').find_all{|s| s!=''}
         @action, *@action_arguments = @path_atoms
-        unless public_methods.include?(@action)||public_methods.include?((@action||'').to_sym)
+        unless public_methods.include?(@action)||(@action&&public_methods.include?(@action.to_sym))
           if public_methods.include?('index')||public_methods.include?(:index)
             @action, @action_arguments = 'index', @path_atoms
           else

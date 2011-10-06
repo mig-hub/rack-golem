@@ -87,6 +87,7 @@ describe "Golem" do
   it "Should send everything to :index if it exists and there is no matching method for first arg" do
     IndexedR.get('/exist/a/b/c/d').body.should=='a+b+c+d'
     IndexedR.get('/a/b/c/d').body.should=='a+b+c+d'
+    IndexedR.get('/').body.should==''
   end
   it "Should set dispatch-specific variables correctly when defaulting to :index" do
     IndexedR.get('/a/b/c/d?switch=true').body.should=="action=index args=a,b,c,d a+b+c+d"
