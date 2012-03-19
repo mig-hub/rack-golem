@@ -9,6 +9,6 @@ Gem::Specification.new do |s|
   s.author = "Mickael Riga"
   s.email = "mig@campbellhay.com"
   s.homepage = "http://www.campbellhay.com"
-  s.add_dependency(%q<tilt>, ["~> 1.2.2"])
+  s.add_dependency(%q<tilt>, [">= 1.2.2"])
   s.add_development_dependency(%q<bacon>, "~> 1.1.0")
 end
