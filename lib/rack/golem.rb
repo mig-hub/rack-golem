@@ -19,7 +19,7 @@ module Rack::Golem
         @path_atoms = @r.path_info.split('/').find_all{|s| s!=''}
         @action, *@action_arguments = @path_atoms
         unless public_methods.include?(@action)||(@action&&public_methods.include?(@action.to_sym))
-          if public_methods.include?('index')||public_methods.include?(:index)
+          if public_methods.include?('index')||public_methods.include?(:index) # For different RUBY_VERSION(s)
             @action, @action_arguments = 'index', @path_atoms
           else
             @action, @action_arguments = 'not_found', @path_atoms
@@ -28,7 +28,13 @@ module Rack::Golem
         
         instance_eval(&self.class.before_block) unless self.class.before_block.nil?
         
-        @res.write(self.__send__(@action,*@action_arguments))
+        begin
+          @res.write(self.__send__(@action,*@action_arguments))
+        rescue ArgumentError => e
+          failed_method = e.backtrace[0][/`.*'$/][1..-2]
+          raise unless failed_method==@action
+          @res.write(self.__send__('not_found', @path_atoms))
+        end
         
         instance_eval(&self.class.after_block) unless self.class.after_block.nil?
       }
@@ -41,6 +47,7 @@ module Rack::Golem
     def call!(env)
       @r = ::Rack::Request.new(env)
       @res = ::Rack::Response.new
+      @session = env['rack.session'] || {}
       instance_eval(&self.class.dispatcher_block)
       @res.status==404&&!@app.nil? ? @app.call(env) : @res.finish
     end
