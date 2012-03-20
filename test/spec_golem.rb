@@ -64,6 +64,7 @@ class SimplyIndexed
   def please_fail(num); 'ArgumentError baby'; end
 end
 SimplyIndexedR = ::Rack::MockRequest.new(::Rack::Lint.new(SimplyIndexed.new))
+SimplyIndexedUsedR = ::Rack::MockRequest.new(::Rack::Lint.new(SimplyIndexed.new(lambda{|env| [200,{},"#{3+nil}"]})))
 
 # =============
 # = Sessioned =
@@ -97,10 +98,10 @@ describe "Golem" do
   it "Should not dispatch if the method is private or does not exist" do
     r = BasicR.get('/no_way')
     r.status.should==404
-    r.body.should=='Not Found: /no_way'
+    r.body.should=='NOT FOUND: /no_way'
     r = BasicR.get('/no')
     r.status.should==404
-    r.body.should=='Not Found: /no'
+    r.body.should=='NOT FOUND: /no'
   end
   
   it "Should follow the rack stack if response is 404 and there are middlewares below" do
@@ -113,7 +114,7 @@ describe "Golem" do
   end
   
   it "Should provide arguments in filter when page is not_found" do
-    FilterR.get('/a/b/c/d').body.should=="a+b+c+dNot Found: /a/b/c/d+after"
+    FilterR.get('/a/b/c/d').body.should=="a+b+c+dNOT FOUND: /a/b/c/d+after"
   end
   
   it "Should send everything to :index if it exists and there is no matching method for first arg" do
@@ -127,6 +128,22 @@ describe "Golem" do
     SimplyIndexedR.get('/unknown').status.should==404
     SimplyIndexedR.get('/will_fail/useless').status.should==404
     lambda{ SimplyIndexedR.get('/will_fail') }.should.raise(ArgumentError)
+  end
+  
+  it "Should handle errors without raising an exception unless in dev mode" do
+    lambda{ SimplyIndexedR.get('/will_fail') }.should.raise(ArgumentError)
+    ENV['RACK_ENV'] = 'development'
+    lambda{ SimplyIndexedR.get('/will_fail') }.should.raise(ArgumentError)
+    ENV['RACK_ENV'] = 'production'
+    res = SimplyIndexedR.get('/will_fail')
+    res.status.should==500
+    ENV['RACK_ENV'] = nil
+  end
+  
+  it "Should not use the error handler if the error occur further down the rack stack" do
+    ENV['RACK_ENV'] = 'production'
+    lambda{ SimplyIndexedUsedR.get('/not_found') }.should.raise(TypeError)
+    ENV['RACK_ENV'] = nil
   end
   
   it "Should set dispatch-specific variables correctly when defaulting to :index" do

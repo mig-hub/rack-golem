@@ -42,20 +42,36 @@ module Rack::Golem
   end
   
   module InstanceMethods
+    
+    DEV_ENV = [nil,'development','dev']
+    
     def initialize(app=nil); @app = app; end
     def call(env); dup.call!(env); end
+    
     def call!(env)
       @r = ::Rack::Request.new(env)
       @res = ::Rack::Response.new
       @session = env['rack.session'] || {}
-      instance_eval(&self.class.dispatcher_block)
+      begin
+        instance_eval(&self.class.dispatcher_block)
+      rescue => e
+        raise if DEV_ENV.include?(ENV['RACK_ENV'])
+        @res.write(self.__send__('error', e, @path_atoms))
+      end
       @res.status==404&&!@app.nil? ? @app.call(env) : @res.finish
     end
+    
     def not_found(*args)
       @res.status = 404
       @res.headers['X-Cascade']='pass'
-      "Not Found: #{@r.path_info}"
+      "NOT FOUND: #{@r.path_info}"
     end
+    
+    def error(e, *args)
+      @res.status = 500
+      "ERROR"
+    end
+    
     def erb(template)
       @@tilt_cache ||= {}
       if @@tilt_cache.has_key?(template)
