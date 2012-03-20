@@ -18,7 +18,7 @@ Install with:
 Config.ru is one of his names, so say it in a Rackup file.
 
     require 'db' # Loads ORM models and all
-    require 'go' # Our controller (I don not like that word really)
+    require 'go' # Our controller (I do not like that word really)
     use Rack::ContentLength
     use Rack::Session::Cookies
     run Go
@@ -42,7 +42,7 @@ And the winner is:
 	    def index(*args)
 	      # When no public method is found
 	      # Of course you don't have to declare one and it is gonna use Controller#not_found instead
-	      # But if it is declared, keep in mind it's a catch-all so make it deal with args
+	      # Still can have arguments
 	      @articles = Post.all
 	      erb :index
 	    end
@@ -65,6 +65,14 @@ And the winner is:
 	      # Like :index this method receives the arguments in order to make something with it
 	      Email.alert('Too many people are looking for porn here') if args.includes?("porn")
 	      super(args)
+	    end
+	    
+	    def error(err, *args)
+	      # Again this one is defined by Golem and only shows up when RACK_ENV is not `nil` or `dev` or `development`
+	      # Default only prints "ERROR"
+	      # Here we're going to send the error message
+	      # One would rarely show that to the end user but this is just a demo
+	      err.message
 	    end
 
 	    after do
