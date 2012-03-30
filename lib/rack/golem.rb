@@ -49,16 +49,18 @@ module Rack::Golem
     def call(env); dup.call!(env); end
     
     def call!(env)
-      @r = ::Rack::Request.new(env)
-      @res = ::Rack::Response.new
-      @session = env['rack.session'] || {}
-      begin
-        instance_eval(&self.class.dispatcher_block)
-      rescue => e
-        raise if DEV_ENV.include?(ENV['RACK_ENV'])
-        @res.write(self.__send__('error', e, @path_atoms))
-      end
-      @res.status==404&&!@app.nil? ? @app.call(env) : @res.finish
+      catch(:response) {
+        @r = ::Rack::Request.new(env)
+        @res = ::Rack::Response.new
+        @session = env['rack.session'] || {}
+        begin
+          instance_eval(&self.class.dispatcher_block)
+        rescue => e
+          raise if DEV_ENV.include?(ENV['RACK_ENV'])
+          @res.write(self.__send__('error', e, @path_atoms))
+        end
+        @res.status==404&&!@app.nil? ? @app.call(env) : @res.finish
+      }
     end
     
     def not_found(*args)

@@ -22,6 +22,10 @@ class Basic
   def no_arg; 'nothing'; end  
   def with_args(a,b); '%s+%s' % [a,b]; end 
   def splat_arg(*a); a.join('+'); end
+  def test_throw
+    throw :response, [200,{'Content-Type'=>'text/html'},['Growl']]
+    'Grrr'
+  end
   private
   def no_way; 'This is private'; end
 end
@@ -154,6 +158,10 @@ describe "Golem" do
     res = SessionedR.get('/set_val/ichigo')
     res_2 = SessionedR.get('/get_val', 'HTTP_COOKIE'=>res["Set-Cookie"])
     res_2.body.should=='ichigo'
+  end
+  
+  it "Should catch :response if needed" do
+    BasicR.get('/test_throw').body.should=='Growl'
   end
   
 end
