@@ -26,6 +26,7 @@ class Basic
     throw :response, [200,{'Content-Type'=>'text/html'},['Growl']]
     'Grrr'
   end
+  def best_restaurants_rss; '<xml>test</xml>'; end
   private
   def no_way; 'This is private'; end
 end
@@ -106,6 +107,10 @@ describe "Golem" do
     r = BasicR.get('/no')
     r.status.should==404
     r.body.should=='NOT FOUND: /no'
+  end
+  
+  it "Should dispatch to appropriate underscored action when name contains '-' or '.'" do
+    BasicR.get('/best-restaurants.rss').body.should=='<xml>test</xml>'
   end
   
   it "Should follow the rack stack if response is 404 and there are middlewares below" do

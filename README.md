@@ -19,6 +19,7 @@ Config.ru is one of his names, so say it in a Rackup file.
 
     require 'db' # Loads ORM models and all
     require 'go' # Our controller (I do not like that word really)
+    require 'json' # not necessary but used in the example
     use Rack::ContentLength
     use Rack::Session::Cookies
     run Go
@@ -55,6 +56,15 @@ And the winner is:
 	        erb :post
 	      end
 	    end
+	    
+	    def best_restaurants_json
+	      # Golem replaces dots and dashes with underscores
+	      # So you can trigger this handler by visiting /best-restaurant.json
+	      @res['Content-Type'] = "text/json"
+	      JSON.generate({
+	        'title' => 'Best restaurants in town',
+	        'list' => Restaurant.full_list
+	      })
 
 	    def say(listener='me', *words)
 	      "Hey #{listener} I don't need ERB to tell you that #{words.join(' ')}"
