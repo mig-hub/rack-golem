@@ -71,6 +71,7 @@ module Rack::Golem
     end
     
     def error(e, *args)
+      puts "\n", e.class, e.message, e.backtrace # Log the error anyway
       @res.status = 500
       "ERROR"
     end

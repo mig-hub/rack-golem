@@ -144,8 +144,13 @@ describe "Golem" do
     ENV['RACK_ENV'] = 'development'
     lambda{ SimplyIndexedR.get('/will_fail') }.should.raise(ArgumentError)
     ENV['RACK_ENV'] = 'production'
+    @old_stdout = $stdout
+    $stdout = StringIO.new
     res = SimplyIndexedR.get('/will_fail')
+    logged = $stdout.dup
+    $stdout = @old_stdout
     res.status.should==500
+    logged.string.should.match(/ArgumentError/)
     ENV['RACK_ENV'] = nil
   end
   

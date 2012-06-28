@@ -1,6 +1,6 @@
 Gem::Specification.new do |s| 
   s.name = 'rack-golem'
-  s.version = "0.1.1"
+  s.version = "0.1.2"
   s.platform = Gem::Platform::RUBY
   s.summary = "A Controller middleware that is fairly basic"
   s.description = "A Controller middleware that is fairly basic. I would say it is a sort of Ramaze for kids"
