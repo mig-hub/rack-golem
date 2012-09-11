@@ -113,6 +113,10 @@ describe "Golem" do
     BasicR.get('/best-restaurants.rss').body.should=='<xml>test</xml>'
   end
   
+  it "Should only apply '-' and '.' substitution on action names" do
+    IndexedR.get('/best-restaurants.rss').body.should=='best-restaurants.rss'
+  end
+  
   it "Should follow the rack stack if response is 404 and there are middlewares below" do
     r = BasicLobsterR.get("/no_way")
     r.status.should==200
